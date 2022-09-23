@@ -66,11 +66,12 @@ jobs:
     - name: Run tests with coverage
       if: "matrix.coverage"
       run: |
-        pip install Cython extension-helpers numpy
-        COVERAGE=1 pip install -e .[test]
-        pytest --pyargs astroscrappy docs --cov astroscrappy
+        COVERAGE=1 pip install -e '.[test]' --no-clean --no-build-isolation
+        pytest --pyargs astroscrappy docs --cov astroscrappy --cov-report=xml:coverage.xml
+        lcov -c --directory . -o coverage.info --no-external
+        lcov -r coverage.info '*/astroscrappy.c' '*/image_utils*' '*/median_utils*' -o coverage.info
     - name: Upload coverage to codecov
       if: "matrix.coverage"
       run: |
         pip install codecov
-        codecov
+        codecov --file coverage.xml coverage.info
